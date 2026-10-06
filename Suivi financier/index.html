@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mon Budget</title>
+
+  <!-- PWA & Intégration Mobile -->
+  <meta name="theme-color" content="#059669">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Mon Budget">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Feuilles de styles & Librairies -->
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- EN-TÊTE PRINCIPAL -->
+  <header class="app-header">
+    <div class="header-main-row">
+      <div class="brand-group">
+        <div class="app-logo">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M20 7H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zm0 12H4V9h16v10zm-3-6a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/>
+          </svg>
+        </div>
+        <div class="brand-titles">
+          <div class="brand-name">Mon Budget</div>
+          <div class="brand-badge">Stockage Local</div>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <!-- Bascule Mode Sombre/Clair -->
+        <button class="btn-icon-theme" id="btnToggleTheme" aria-label="Changer le thème">
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <button class="btn-header-add" id="btnOpenAddModal">
+          <span>+</span> Ajouter
+        </button>
+      </div>
+    </div>
+
+    <!-- SÉLECTEUR DE MOIS FLUIDE -->
+    <div class="month-bar" id="monthBar">
+      <div class="month-bar-inner">
+        <button class="btn-month-nav" id="btnPrevMonth" aria-label="Mois précédent">&#8249;</button>
+        <div class="current-month-display" id="displayMonth">Septembre 2026</div>
+        <button class="btn-month-nav" id="btnNextMonth" aria-label="Mois suivant">&#8250;</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENU PRINCIPAL -->
+  <main class="container">
+    <!-- 1. VUE MENSUELLE -->
+    <section id="view-month" class="tab-view active">
+      <!-- En-tête de section unifié -->
+      <div class="card viz-header-card" style="margin-bottom: 14px;">
+        <div class="viz-header-top">
+          <div class="viz-header-title-box">
+            <span class="viz-badge">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              Suivi & Pilotage
+            </span>
+            <h1 class="card-title" style="font-size: 1.35rem; margin-top: 4px;">Synthèse Mensuelle</h1>
+            <p class="card-subtitle">Visualisez vos flux de trésorerie, recherchez vos opérations et pilotez votre solde net.</p>
+          </div>
+          <div class="month-header-actions">
+            <button class="btn-action-ghost" id="btnExportMonthCsv" title="Exporter les opérations du mois au format CSV">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              <span>Export CSV</span>
+            </button>
+            <button class="btn-action-ghost" id="btnPrintMonthSummary" title="Imprimer la synthèse du mois">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              <span>Imprimer</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cartes statistiques KPI mensuelles -->
+      <div class="summary-grid">
+        <div class="stat-card">
+          <div class="stat-info">
+            <h3>Revenus (Salaire)</h3>
+            <div class="amount" id="stat-income" style="color: var(--income);">0,00 €</div>
+            <div class="sub" id="stat-income-sub">0 entrée ce mois-ci</div>
+          </div>
+          <div class="stat-icon icon-income">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <h3>Total Dépenses</h3>
+            <div class="amount" id="stat-expense" style="color: var(--expense);">0,00 €</div>
+            <div class="sub" id="stat-expense-sub">0 dépense ce mois-ci</div>
+          </div>
+          <div class="stat-icon icon-expense">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="7" x2="17" y2="17"/><polyline points="17 7 17 17 7 17"/></svg>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <h3>Solde Net Restant</h3>
+            <div class="amount" id="stat-balance">0,00 €</div>
+            <div class="sub" id="stat-balance-sub">Équilibre</div>
+          </div>
+          <div class="stat-icon icon-balance">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Répartition triée par influence -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="viz-badge" style="font-size: 0.68rem; margin-bottom: 4px;">Ventilation</span>
+            <h2 class="card-title">Impact sur le budget</h2>
+            <div class="card-subtitle">Classé de la dépense la plus forte à la plus faible</div>
+          </div>
+        </div>
+        <div id="categoryBarsList"></div>
+      </div>
+
+      <!-- Liste détaillée des opérations avec recherche, filtre instantané et duplication -->
+      <div class="card">
+        <div class="card-header" style="flex-wrap: wrap; gap: 10px;">
+          <div>
+            <span class="viz-badge" style="font-size: 0.68rem; margin-bottom: 4px;">Grand Livre</span>
+            <h2 class="card-title">Opérations du mois</h2>
+            <div class="card-subtitle" id="txCountSubtitle">0 opération enregistrée</div>
+          </div>
+          <div class="tx-total-badge" id="txFilteredTotalBadge">Total : 0,00 €</div>
+        </div>
+
+        <!-- Barre de recherche & filtres interactifs en direct -->
+        <div class="tx-filter-bar">
+          <div class="tx-search-wrap">
+            <svg class="tx-search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="txSearchInput" class="tx-search-input" placeholder="Rechercher une opération (titre, note, montant)...">
+            <button type="button" id="btnClearTxSearch" class="tx-search-clear" style="display: none;" title="Effacer la recherche">&times;</button>
+          </div>
+          <div class="tx-filter-controls">
+            <div class="tx-type-pills" id="txTypePills">
+              <button type="button" class="tx-pill-btn active" data-type="all">Toutes</button>
+              <button type="button" class="tx-pill-btn" data-type="expense">Dépenses</button>
+              <button type="button" class="tx-pill-btn" data-type="income">Rentrées</button>
+            </div>
+            <select id="txFilterCategory" class="tx-cat-select" aria-label="Filtrer par catégorie">
+              <option value="all">Toutes les catégories</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="transactionsList"></div>
+      </div>
+    </section>
+
+    <!-- 2. VUE COMPTEUR TEMPS RÉEL (GAINS EN DIRECT AU TRAVAIL) -->
+    <section id="view-realtime" class="tab-view" style="display: none;">
+      <!-- En-tête de section unifié -->
+      <div class="card viz-header-card" style="margin-bottom: 14px; max-width: 540px; margin-left: auto; margin-right: auto;">
+        <div class="viz-header-top">
+          <div class="viz-header-title-box">
+            <span class="viz-badge">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Direct & Temps Réel
+            </span>
+            <h1 class="card-title" style="font-size: 1.35rem; margin-top: 4px;">Accumulation des Gains</h1>
+            <p class="card-subtitle">Compteur 60 FPS à haute précision calculé en direct selon vos plages de travail.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rt-container" id="rtComponentRoot">
+        <!-- Halo lumineux dynamique -->
+        <div class="rt-glow-aura" id="rtGlowAura"></div>
+
+        <!-- Carte Centrale Dark UI Néo-Banque -->
+        <div class="rt-card" id="rtCard">
+          
+          <!-- En-tête : Marque & Statut Dynamique -->
+          <div class="rt-card-top">
+            <div class="rt-brand-meta">
+              <div class="rt-brand-icon">⚡</div>
+              <div class="rt-brand-text">
+                <h2 class="rt-title">Accumulation Directe</h2>
+                <div class="rt-subtitle">Gains en direct au travail</div>
+              </div>
+            </div>
+
+            <div class="rt-status-badge" id="rtStatusBadge">
+              <span class="rt-status-dot" id="rtStatusDot"></span>
+              <span id="rtStatusText">Initialisation...</span>
+            </div>
+          </div>
+
+          <!-- Écran Principal du Compteur (60 FPS & 6 Décimales - Sans sautillement) -->
+          <div class="rt-screen" aria-label="Compteur de gains en temps réel">
+            <div class="rt-screen-sublabel" id="rtPeriodLabel">Gain effectif cumulé</div>
+            
+            <div class="rt-amount-display">
+              <span class="rt-currency">€</span>
+              <span class="rt-int" id="rtAmountInt">0</span>
+              <span class="rt-sep">,</span>
+              <span class="rt-decimals" id="rtAmountDecimals">000000</span>
+            </div>
+
+            <div class="rt-screen-footer">
+              <span>Temps actif travaillé :</span>
+              <span class="rt-time-worked" id="rtTimeWorked">00:00:00 / 08:00:00</span>
+            </div>
+          </div>
+
+          <!-- Jauge d'avancement de la journée (8h ouvrées) -->
+          <div class="rt-progress-section" aria-label="Progression horaire de la journée">
+            <div class="rt-progress-labels">
+              <span class="rt-progress-title" id="rtProgressTitle">Progression journée</span>
+              <span class="rt-progress-pct" id="rtProgressPercent">0.0 %</span>
+            </div>
+
+            <div class="rt-progress-track">
+              <div class="rt-progress-fill" id="rtProgressFill"></div>
+            </div>
+
+            <div class="rt-progress-milestones">
+              <span id="rtMilestoneStart">08h00 (0%)</span>
+              <span class="rt-milestone-mid" id="rtMilestoneMid">12h00 (50%)</span>
+              <span id="rtMilestoneEnd">16h45 (100%)</span>
+            </div>
+          </div>
+
+          <!-- Grille KPI secondaire -->
+          <div class="rt-kpi-grid">
+            <div class="rt-kpi-card">
+              <span class="rt-kpi-label">Plafond jour (8h)</span>
+              <span class="rt-kpi-val" id="rtKpiMaxDaily">51,40 €</span>
+            </div>
+            <div class="rt-kpi-card">
+              <span class="rt-kpi-label">Rythme / minute</span>
+              <span class="rt-kpi-val" id="rtKpiRatePerMin">0,1071 €</span>
+            </div>
+          </div>
+
+          <!-- Configuration Salaire Mensuel & Taux Horaire Automatique -->
+          <div class="rt-salary-calc-box">
+            <div class="rt-salary-calc-header">
+              <div class="rt-salary-title-group">
+                <span class="rt-salary-icon">💶</span>
+                <div>
+                  <div class="rt-salary-title">Rémunération & Salaire</div>
+                  <div class="rt-salary-subtitle" id="rtSalaryHoursBasis">Base : 8h / jour &bull; ~173,3h / mois (21,7 j/mois)</div>
+                </div>
+              </div>
+              <span class="rt-salary-badge">Calcul auto</span>
+            </div>
+
+            <div class="rt-salary-inputs-grid">
+              <!-- Saisie Salaire Mensuel -->
+              <div class="rt-salary-field">
+                <div class="rt-field-header">
+                  <label for="rtMonthlySalaryInput">Salaire mensuel net</label>
+                  <span class="rt-field-tag">Saisie libre</span>
+                </div>
+                <div class="rt-rate-input-wrap">
+                  <input 
+                    type="number" 
+                    id="rtMonthlySalaryInput" 
+                    class="rt-rate-input rt-salary-input" 
+                    step="0.01" 
+                    min="0" 
+                    placeholder="Ex: 1800.00"
+                    aria-label="Salaire mensuel net en euros"
+                  >
+                  <span>€/mois</span>
+                </div>
+                <div class="rt-field-hint">Inscrivez votre salaire mensuel</div>
+              </div>
+
+              <!-- Taux Horaire Calculé Automatiquement -->
+              <div class="rt-salary-field">
+                <div class="rt-field-header">
+                  <label for="rtHourlyRateInput">Salaire horaire effectif</label>
+                  <span class="rt-field-tag tag-auto">Calculé auto</span>
+                </div>
+                <div class="rt-rate-input-wrap">
+                  <input 
+                    type="number" 
+                    id="rtHourlyRateInput" 
+                    class="rt-rate-input" 
+                    step="0.001" 
+                    min="0" 
+                    value="6.425"
+                    aria-label="Taux horaire en euros par heure"
+                  >
+                  <span>€/h</span>
+                </div>
+                <div class="rt-field-hint">Ajusté selon vos horaires de travail</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modification des Horaires de travail -->
+          <div class="rt-schedule-box">
+            <div class="rt-schedule-header" id="rtBtnToggleSchedule">
+              <div class="rt-schedule-title-wrap">
+                <span class="rt-schedule-icon">⚙️</span>
+                <div>
+                  <div class="rt-schedule-title">Horaires de travail</div>
+                  <div class="rt-schedule-sub" id="rtScheduleSummary">Matin : 08h00 - 12h00 &bull; A-Midi : 12h45 - 16h45</div>
+                </div>
+              </div>
+              <span class="rt-schedule-toggle-tag" id="rtScheduleTag">Modifier</span>
+            </div>
+
+            <div class="rt-schedule-body" id="rtScheduleBody" style="display: none;">
+              <div class="rt-schedule-grid">
+                <div class="rt-shift-card">
+                  <div class="rt-shift-badge">Session Matin</div>
+                  <div class="rt-time-inputs-row">
+                    <div class="rt-time-field">
+                      <label for="rtMorningStart">Début</label>
+                      <input type="time" id="rtMorningStart" class="form-control rt-time-input" value="08:00" required>
+                    </div>
+                    <span class="rt-time-sep">&rarr;</span>
+                    <div class="rt-time-field">
+                      <label for="rtMorningEnd">Pause (Fin)</label>
+                      <input type="time" id="rtMorningEnd" class="form-control rt-time-input" value="12:00" required>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="rt-shift-card">
+                  <div class="rt-shift-badge">Session Après-midi</div>
+                  <div class="rt-time-inputs-row">
+                    <div class="rt-time-field">
+                      <label for="rtAfternoonStart">Reprise</label>
+                      <input type="time" id="rtAfternoonStart" class="form-control rt-time-input" value="12:45" required>
+                    </div>
+                    <span class="rt-time-sep">&rarr;</span>
+                    <div class="rt-time-field">
+                      <label for="rtAfternoonEnd">Fin journée</label>
+                      <input type="time" id="rtAfternoonEnd" class="form-control rt-time-input" value="16:45" required>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rt-schedule-actions">
+                <div class="rt-total-work-display">
+                  <span>Total effectif calculé :</span>
+                  <strong id="rtTotalWorkDuration">08 h 00 / jour</strong>
+                </div>
+                <button type="button" class="btn-reset-schedule" id="btnResetSchedule" title="Rétablir les horaires initiaux (08h00-12h00 / 12h45-16h45)">
+                  ↺ Par défaut
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CENTRE DE VISUALISATION & ANALYTIQUE -->
+    <section id="view-charts" class="tab-view" style="display: none;">
+      <!-- EN-TÊTE DU CENTRE & OUTILS D'HORIZON -->
+      <div class="card viz-header-card">
+        <div class="viz-header-top">
+          <div class="viz-header-title-box">
+            <div class="viz-badge">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+              <span>Cockpit Analytique</span>
+            </div>
+            <h2 class="card-title" style="margin-top: 4px;">Centre de Visualisation</h2>
+            <p class="card-subtitle" id="vizSubtitleSummary">Analyse approfondie, extrêmes par catégorie et flux financiers</p>
+          </div>
+          <div class="viz-quick-actions">
+            <button class="viz-action-btn" id="btnExportVizChart" type="button" title="Télécharger l'image PNG du graphique affiché">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <span>Image PNG</span>
+            </button>
+            <button class="viz-action-btn" id="btnExportVizCsv" type="button" title="Exporter le rapport des statistiques Min/Max et Totaux en fichier CSV">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>Export CSV</span>
+            </button>
+            <button class="viz-action-btn viz-action-demo" id="btnLoadDemoData" type="button" title="Générer des données de démo réalistes pour tester le centre de visualisation">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="4"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="16" r="1.5"/><circle cx="16" cy="8" r="1.5"/><circle cx="8" cy="16" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>
+              <span>Données Démo</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- BARRE DE PÉRIODE & NAVIGATION ANNUELLE -->
+        <div class="viz-period-bar">
+          <div class="viz-year-picker">
+            <button class="btn-picker-nav" id="btnVizPrevYear" type="button" aria-label="Année précédente">&#8249;</button>
+            <span class="viz-year-label" id="vizYearDisplay">2026</span>
+            <button class="btn-picker-nav" id="btnVizNextYear" type="button" aria-label="Année suivante">&#8250;</button>
+            <button class="btn-reset-year" id="btnVizCurrentYear" type="button" title="Revenir à l'année en cours">Aujourd'hui</button>
+          </div>
+
+          <div class="viz-horizon-selector" id="vizHorizonSelector">
+            <button class="viz-horizon-btn active" data-horizon="year" type="button">Année civile</button>
+            <button class="viz-horizon-btn" data-horizon="rolling12" type="button">12 mois glissants</button>
+            <button class="viz-horizon-btn" data-horizon="last6" type="button">6 derniers mois</button>
+            <button class="viz-horizon-btn" data-horizon="all" type="button">Tout l'historique</button>
+          </div>
+        </div>
+
+        <!-- COMMUTATEUR DES 4 MODES DU CENTRE -->
+        <div class="viz-mode-tabs" id="vizModeTabs">
+          <button class="viz-mode-tab active" data-mode="minmax" id="btnTabMinMax" type="button">
+            <span class="mode-icon">📊</span>
+            <span>Min & Max Catégories</span>
+          </button>
+          <button class="viz-mode-tab" data-mode="trends" id="btnTabTrends" type="button">
+            <span class="mode-icon">📈</span>
+            <span>Évolution & Courbes</span>
+          </button>
+          <button class="viz-mode-tab" data-mode="breakdown" id="btnTabBreakdown" type="button">
+            <span class="mode-icon">🍩</span>
+            <span>Répartition & Top</span>
+          </button>
+          <button class="viz-mode-tab" data-mode="balance" id="btnTabBalance" type="button">
+            <span class="mode-icon">⚖️</span>
+            <span>Flux & Épargne</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- 1. VUE : MIN, MAX & EXTRÊMES PAR CATÉGORIE                         -->
+      <!-- ================================================================== -->
+      <div id="vizViewMinMax" class="viz-view-section active">
+        <!-- Bandeau de Flash KPIs Extrêmes Globaux -->
+        <div class="extremes-kpi-grid">
+          <div class="extreme-kpi-card kpi-top-volume">
+            <div class="extreme-kpi-badge">🏆 N°1 DES DÉPENSES</div>
+            <div class="extreme-kpi-main" id="kpiTopCatName">-</div>
+            <div class="extreme-kpi-val" id="kpiTopCatAmount">0,00 €</div>
+            <div class="extreme-kpi-sub" id="kpiTopCatSub">0% du budget total</div>
+          </div>
+
+          <div class="extreme-kpi-card kpi-peak-record">
+            <div class="extreme-kpi-badge">🚀 PIC RECORD MENSUEL</div>
+            <div class="extreme-kpi-main" id="kpiPeakCatName">-</div>
+            <div class="extreme-kpi-val text-expense" id="kpiPeakAmount">0,00 €</div>
+            <div class="extreme-kpi-sub" id="kpiPeakMonth">-</div>
+          </div>
+
+          <div class="extreme-kpi-card kpi-lowest-record">
+            <div class="extreme-kpi-badge">🍃 MOIS LE PLUS ÉCONOME</div>
+            <div class="extreme-kpi-main" id="kpiLowCatName">-</div>
+            <div class="extreme-kpi-val text-income" id="kpiLowAmount">0,00 €</div>
+            <div class="extreme-kpi-sub" id="kpiLowMonth">-</div>
+          </div>
+
+          <div class="extreme-kpi-card kpi-volatile-record">
+            <div class="extreme-kpi-badge">🌊 PLUS FORTE VARIABILITÉ</div>
+            <div class="extreme-kpi-main" id="kpiVolatileCatName">-</div>
+            <div class="extreme-kpi-val" id="kpiVolatileAmplitude">0,00 €</div>
+            <div class="extreme-kpi-sub" id="kpiVolatileSub">Écart Max - Min</div>
+          </div>
+        </div>
+
+        <!-- Graphique Comparatif d'Amplitude (Min vs Moyenne vs Max) -->
+        <div class="card" style="margin-top: 14px;">
+          <div class="card-header-flex">
+            <div>
+              <h3 class="card-section-title">Comparatif d'Amplitude : Min vs Moyenne vs Max</h3>
+              <p class="card-subtitle">Visualisez directement l'écart type et les pics de chaque catégorie sur la période</p>
+            </div>
+            <div class="minmax-chart-legend-pills">
+              <span class="pill-leg pill-leg-min"><span class="dot"></span> Minimum</span>
+              <span class="pill-leg pill-leg-avg"><span class="dot"></span> Moyenne</span>
+              <span class="pill-leg pill-leg-max"><span class="dot"></span> Maximum (Pic)</span>
+            </div>
+          </div>
+          <div class="chart-wrapper minmax-chart-wrap">
+            <canvas id="vizMinMaxChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Toolbar de Filtrage & Grille des Cartes Détaillées -->
+        <div class="card" style="margin-top: 14px;">
+          <div class="minmax-filter-toolbar">
+            <div class="filter-type-segment" id="minmaxTypeSegment">
+              <button class="filter-type-btn active" data-type="expense" type="button">Dépenses</button>
+              <button class="filter-type-btn" data-type="income" type="button">Revenus</button>
+              <button class="filter-type-btn" data-type="all" type="button">Toutes</button>
+            </div>
+
+            <div class="minmax-calc-toggle">
+              <label class="toggle-switch-label" title="Si coché, le minimum est calculé uniquement sur les mois où des dépenses ont eu lieu (> 0 €), pour afficher votre vrai mois le plus économe.">
+                <input type="checkbox" id="toggleMinNonZero" checked>
+                <span class="toggle-slider"></span>
+                <span class="toggle-text">Min sur mois actifs (&gt; 0 €)</span>
+              </label>
+            </div>
+
+            <div class="minmax-sort-group">
+              <label for="selectMinMaxSort" class="sort-label">Trier par :</label>
+              <select id="selectMinMaxSort" class="form-control minmax-sort-select">
+                <option value="maxDesc">Pic Max décroissant ▾</option>
+                <option value="totalDesc">Total cumulé ▾</option>
+                <option value="amplitudeDesc">Plus forte variabilité (Max - Min) ▾</option>
+                <option value="minAsc">Min mensuel croissant ▴</option>
+                <option value="nameAsc">Nom (A-Z)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Grille des Cartes Min/Max par Catégorie -->
+          <div class="category-minmax-grid" id="categoryMinMaxCardsGrid">
+            <!-- Injecté dynamiquement en JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- 2. VUE : ÉVOLUTION & COURBES TEMPORELLES                            -->
+      <!-- ================================================================== -->
+      <div id="vizViewTrends" class="viz-view-section" style="display: none;">
+        <div class="card">
+          <div class="card-header-flex">
+            <div>
+              <h3 class="card-section-title">Évolution des Dépenses dans le Temps</h3>
+              <p class="card-subtitle">Courbes mensuelles multi-catégories avec filtres rapides et personnalisation</p>
+            </div>
+            <div class="chart-render-type-pills" id="trendChartTypePills">
+              <button class="chart-type-pill active" data-charttype="line" type="button">Courbes lissées</button>
+              <button class="chart-type-pill" data-charttype="bar" type="button">Barres empilées</button>
+              <button class="chart-type-pill" data-charttype="area" type="button">Aires dégradées</button>
+            </div>
+          </div>
+
+          <!-- Contrôles et Filtres de catégories -->
+          <div class="chart-controls-box" id="catFilterBox">
+            <div class="chart-filter-top-row">
+              <div class="chart-label">CATÉGORIES VISIBLES</div>
+              <div class="cat-quick-presets">
+                <button type="button" class="preset-btn" id="btnPresetTop3">Top 3 dépenses</button>
+                <button type="button" class="preset-btn" id="btnSelectAllCats">Tout cocher</button>
+                <button type="button" class="preset-btn" id="btnUnselectAllCats">Tout décocher</button>
+              </div>
+            </div>
+
+            <button class="multi-dropdown-trigger" id="btnToggleCatDropdown" type="button">
+              <span>Choisir les catégories à afficher</span>
+              <span>&#9662;</span>
+            </button>
+            <div class="multi-dropdown-menu" id="catDropdownMenu">
+              <div class="dropdown-search-box">
+                <input type="text" id="inputCatSearch" placeholder="Rechercher une catégorie..." class="form-control" style="padding: 7px 10px; font-size: 0.85rem;">
+              </div>
+              <div id="catCheckboxesList"></div>
+            </div>
+            <div class="chips-container" id="activeCategoryChips"></div>
+          </div>
+
+          <!-- Canvas Graphique d'Évolution -->
+          <div class="chart-wrapper">
+            <canvas id="evolutionChart"></canvas>
+          </div>
+
+          <!-- Bandeau de synthèse des tendances sous le graphique -->
+          <div class="trends-summary-banner" id="trendsSummaryBanner"></div>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- 3. VUE : RÉPARTITION & STRUCTURE (DONUT & PARETO)                  -->
+      <!-- ================================================================== -->
+      <div id="vizViewBreakdown" class="viz-view-section" style="display: none;">
+        <div class="card">
+          <div class="card-header-flex">
+            <div>
+              <h3 class="card-section-title">Répartition & Structure des Postes</h3>
+              <p class="card-subtitle">Poids relatif de chaque catégorie et classement des dépenses</p>
+            </div>
+            <div class="filter-type-segment" id="breakdownTypeSegment">
+              <button class="breakdown-type-btn active" data-btype="expense" type="button">Dépenses</button>
+              <button class="breakdown-type-btn" data-btype="income" type="button">Revenus</button>
+            </div>
+          </div>
+
+          <div class="breakdown-two-cols">
+            <!-- Colonne Donut -->
+            <div class="breakdown-donut-col">
+              <div class="donut-chart-wrapper">
+                <canvas id="breakdownChart"></canvas>
+                <div class="donut-center-info" id="donutCenterInfo">
+                  <span class="donut-center-label">Total analysé</span>
+                  <strong class="donut-center-val" id="donutCenterVal">0,00 €</strong>
+                  <span class="donut-center-sub" id="donutCenterSub">0 catégories</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Colonne Liste Ordonnée & Pareto -->
+            <div class="breakdown-list-col">
+              <div class="pareto-insight-box" id="paretoInsightBox">
+                <span class="pareto-icon">📊</span>
+                <span id="paretoInsightText">Analyse de concentration du budget...</span>
+              </div>
+              <div class="breakdown-ranked-list" id="breakdownRankedList">
+                <!-- Rendu dynamique -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- 4. VUE : FLUX, BALANCE & TAUX D'ÉPARGNE                            -->
+      <!-- ================================================================== -->
+      <div id="vizViewBalance" class="viz-view-section" style="display: none;">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-section-title">Flux Financier & Taux d'Épargne</h3>
+            <p class="card-subtitle">Comparaison directe Rentrées vs Sorties et solde net accumulé</p>
+          </div>
+
+          <!-- Grille de KPIs Financiers Avancés -->
+          <div class="balance-stats-grid-extended">
+            <div class="b-stat-card">
+              <div class="b-stat-title">Rentrées totales</div>
+              <div class="b-stat-value text-income" id="balTotalIncome">0,00 €</div>
+              <div class="b-stat-sub" id="balTotalIncomeSub">Revenus de la période</div>
+            </div>
+            <div class="b-stat-card">
+              <div class="b-stat-title">Dépenses totales</div>
+              <div class="b-stat-value text-expense" id="balTotalExpense">0,00 €</div>
+              <div class="b-stat-sub" id="balTotalExpenseSub">Charges constatées</div>
+            </div>
+            <div class="b-stat-card card-accent-net">
+              <div class="b-stat-title">Solde net global</div>
+              <div class="b-stat-value" id="balanceYearTotal">0,00 €</div>
+              <div class="b-stat-sub" id="balNetVerdict">Épargne nette</div>
+            </div>
+            <div class="b-stat-card card-savings-rate">
+              <div class="b-stat-title">Taux d'épargne moyen</div>
+              <div class="b-stat-value" id="balSavingsRate">0.0%</div>
+              <div class="b-stat-sub" id="balSavingsBadge">Santé financière</div>
+            </div>
+            <div class="b-stat-card">
+              <div class="b-stat-title">Moyenne mensuelle nette</div>
+              <div class="b-stat-value" id="balanceYearAvg">0,00 €</div>
+              <div class="b-stat-sub">Par mois actif</div>
+            </div>
+            <div class="b-stat-card">
+              <div class="b-stat-title">Meilleur mois</div>
+              <div class="b-stat-value" id="balanceBestMonth">-</div>
+              <div class="b-stat-sub">Record d'excédent</div>
+            </div>
+          </div>
+
+          <!-- Canvas Graphique Flux -->
+          <div class="chart-wrapper" style="margin-top: 18px;">
+            <canvas id="balanceChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- SECTION COMMUNE : 💡 INSIGHTS & ANALYSES INTELLIGENTES             -->
+      <!-- ================================================================== -->
+      <div class="card viz-insights-card" id="vizInsightsContainer" style="margin-top: 14px;">
+        <div class="insights-header">
+          <div class="insights-title-group">
+            <span class="insights-spark-icon">💡</span>
+            <div>
+              <h3 class="card-section-title" style="margin: 0;">Insights & Détections Intelligentes</h3>
+              <p class="card-subtitle" style="margin: 0;">Analyses automatisées des variations et habitudes budgétaires</p>
+            </div>
+          </div>
+          <span class="insights-tag">Généré en temps réel</span>
+        </div>
+        <div class="insights-grid" id="vizInsightsGrid">
+          <!-- Injecté dynamiquement -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. GESTION DES CATÉGORIES -->
+    <section id="view-categories" class="tab-view" style="display: none;">
+      <!-- En-tête de section unifié -->
+      <div class="card viz-header-card" style="margin-bottom: 14px;">
+        <div class="viz-header-top">
+          <div class="viz-header-title-box">
+            <span class="viz-badge">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01"/></svg>
+              Gestion Budgétaire
+            </span>
+            <h1 class="card-title" style="font-size: 1.35rem; margin-top: 4px;">Gestion des Catégories</h1>
+            <p class="card-subtitle">Personnalisez vos postes de dépenses et de revenus, suivez leurs totaux et lancez des analyses ciblées.</p>
+          </div>
+          <button class="btn-submit" id="btnOpenNewCatModal" style="width: auto; padding: 10px 18px; margin: 0; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 6px;">
+            <span style="font-size: 1.15rem; line-height: 1;">+</span>
+            <span>Nouvelle catégorie</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Résumé statistique des catégories -->
+      <div class="cat-summary-grid">
+        <div class="cat-stat-card">
+          <span class="cat-stat-label">Total catégories</span>
+          <strong class="cat-stat-value" id="catStatTotalCount">0</strong>
+        </div>
+        <div class="cat-stat-card">
+          <span class="cat-stat-label">Catégories Dépenses</span>
+          <strong class="cat-stat-value text-expense" id="catStatExpenseCount">0</strong>
+        </div>
+        <div class="cat-stat-card">
+          <span class="cat-stat-label">Catégories Rentrées</span>
+          <strong class="cat-stat-value text-income" id="catStatIncomeCount">0</strong>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="viz-badge" style="font-size: 0.68rem; margin-bottom: 4px;">Répertoire</span>
+            <h2 class="card-title">Liste des Catégories configurées</h2>
+            <div class="card-subtitle">Cliquez sur « Analyser » pour voir l'historique complet, les Min/Max et les opérations associées</div>
+          </div>
+        </div>
+        <div id="allCategoriesList" class="categories-grid-list"></div>
+      </div>
+    </section>
+
+    <!-- 5. SAUVEGARDE & PARAMÈTRES -->
+    <section id="view-data" class="tab-view" style="display: none;">
+      <!-- En-tête de section unifié -->
+      <div class="card viz-header-card" style="margin-bottom: 14px;">
+        <div class="viz-header-top">
+          <div class="viz-header-title-box">
+            <span class="viz-badge">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Système & Paramètres
+            </span>
+            <h1 class="card-title" style="font-size: 1.35rem; margin-top: 4px;">Données & Paramètres</h1>
+            <p class="card-subtitle">Diagnostic du stockage local, sauvegardes JSON sécurisées et statut de l'application hors-ligne.</p>
+          </div>
+          <div class="system-status-pill" id="systemOnlineStatus">
+            <span class="sys-status-dot"></span>
+            <span id="systemOnlineText">Mode Local Actif</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carte 1 : Diagnostic & Métriques du Stockage Local -->
+      <div class="card system-stats-card">
+        <div class="card-header" style="flex-wrap: wrap; gap: 8px;">
+          <div>
+            <span class="viz-badge" style="font-size: 0.68rem; margin-bottom: 4px;">Stockage Embarqué</span>
+            <h2 class="card-title">Diagnostic du Stockage Local</h2>
+            <div class="card-subtitle">Données 100% privées enregistrées localement dans votre navigateur</div>
+          </div>
+          <button class="btn-action-ghost" id="btnRefreshSystemStats" title="Actualiser les métriques">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            <span>Actualiser</span>
+          </button>
+        </div>
+
+        <!-- Jauge visuelle d'utilisation LocalStorage -->
+        <div class="storage-meter-box">
+          <div class="storage-meter-labels">
+            <span>Espace LocalStorage utilisé</span>
+            <strong id="storageUsageText">0 Ko / ~5 120 Ko (0.0%)</strong>
+          </div>
+          <div class="storage-meter-track">
+            <div class="storage-meter-fill" id="storageMeterFill" style="width: 1%;"></div>
+          </div>
+        </div>
+
+        <!-- Grille de métriques globales -->
+        <div class="system-kpi-grid">
+          <div class="sys-kpi-box">
+            <span class="sys-kpi-label">Total opérations</span>
+            <strong class="sys-kpi-val" id="sysKpiTxCount">0</strong>
+          </div>
+          <div class="sys-kpi-box">
+            <span class="sys-kpi-label">Catégories actives</span>
+            <strong class="sys-kpi-val" id="sysKpiCatCount">0</strong>
+          </div>
+          <div class="sys-kpi-box">
+            <span class="sys-kpi-label">Période couverte</span>
+            <strong class="sys-kpi-val" id="sysKpiDateRange">-</strong>
+          </div>
+          <div class="sys-kpi-box">
+            <span class="sys-kpi-label">Dernière sauvegarde</span>
+            <strong class="sys-kpi-val" id="sysKpiLastBackup">-</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carte 2 : Sauvegarde & Restauration JSON -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="viz-badge" style="font-size: 0.68rem; margin-bottom: 4px;">Transfert & Sécurité</span>
+            <h2 class="card-title">Sauvegarde & Restauration</h2>
+            <div class="card-subtitle">Exportez vos comptes au format JSON ou transférez vos opérations vers un autre appareil</div>
+          </div>
+        </div>
+
+        <div class="backup-actions-grid">
+          <div class="backup-action-card">
+            <div class="backup-card-icon">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            </div>
+            <div class="backup-card-info">
+              <h3>Exporter la sauvegarde (.json)</h3>
+              <p>Télécharge l'intégralité de vos comptes, catégories, budgets et réglages.</p>
+            </div>
+            <button class="btn-submit btn-export" id="btnExportJson">
+              Télécharger la sauvegarde (.json)
+            </button>
+          </div>
+
+          <div class="backup-action-card">
+            <div class="backup-card-icon">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            </div>
+            <div class="backup-card-info">
+              <h3>Restaurer une sauvegarde</h3>
+              <p>Importe un fichier .json précédemment exporté pour recharger vos comptes.</p>
+            </div>
+            <label class="btn-submit btn-import" style="margin-top: 8px;">
+              Choisir un fichier (.json)
+              <input type="file" id="inputImportJson" accept=".json" style="display: none;">
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carte 3 : PWA & Icônes applicatives -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="viz-badge" style="font-size: 0.68rem; margin-bottom: 4px;">PWA & Application</span>
+            <h2 class="card-title">Icônes pour Écran d'accueil Mobile</h2>
+            <div class="card-subtitle">Icônes officielles haute définition compatibles Android & iOS PWA</div>
+          </div>
+        </div>
+        <div class="pwa-icons-row">
+          <div class="pwa-icon-preview">
+            <img src="icon-192.png" alt="Icône PWA" width="56" height="56" style="border-radius: 14px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+            <span>Icône 192px & 512px prêtes</span>
+          </div>
+          <button class="btn-submit" id="btnDownloadIcons" style="max-width: 320px; background: var(--primary);">
+            Télécharger les 2 icônes PNG
+          </button>
+        </div>
+      </div>
+
+      <!-- Carte 4 : Zone de danger (Réinitialisation sécurisée) -->
+      <div class="card card-danger-zone">
+        <div class="card-header">
+          <div>
+            <span class="viz-badge badge-danger">Zone de Danger</span>
+            <h2 class="card-title text-expense">Réinitialiser l'application</h2>
+            <div class="card-subtitle">Efface toutes les opérations pour repartir d'un compte complètement vierge</div>
+          </div>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+          Cette opération supprime l'ensemble des données enregistrées dans votre navigateur. Pensez à faire une sauvegarde JSON au préalable.
+        </p>
+        <button class="btn-danger" id="btnResetAllData">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <span>Réinitialiser toutes les données locales</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- NAVIGATION INFÉRIEURE TACTILE -->
+  <nav class="bottom-nav">
+    <button class="nav-tab-btn active" data-tab="view-month">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span>Mois</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="view-realtime">
+      <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span>T. Réel</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="view-charts">
+      <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      <span>Visualisation</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="view-categories">
+      <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01"/></svg>
+      <span>Catégories</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="view-data">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      <span>Données</span>
+    </button>
+  </nav>
+
+  <!-- MODALE AJOUT / MODIFICATION D'UNE OPÉRATION -->
+  <div class="modal-overlay" id="modalExpense">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span id="modalExpenseTitle">Ajouter une opération</span>
+        <button class="modal-close-btn" id="btnCloseExpenseModal" aria-label="Fermer la modale">&times;</button>
+      </div>
+      <form id="formExpense">
+        <input type="hidden" id="editTxId" value="">
+        <div class="form-group">
+          <label for="expenseCategory">Catégorie</label>
+          <select id="expenseCategory" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label for="expenseAmount">Montant (€)</label>
+          <input type="number" step="0.01" min="0.01" id="expenseAmount" class="form-control" placeholder="Ex: 25.50" required>
+        </div>
+        <div class="form-group">
+          <label for="expenseDate">Date de l'opération</label>
+          <input type="date" id="expenseDate" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label for="expenseNote">Description / Note (optionnel)</label>
+          <input type="text" id="expenseNote" class="form-control" placeholder="Ex: Plein station, Virement salaire...">
+        </div>
+        <button type="submit" class="btn-submit" id="btnSubmitExpense">Enregistrer l'opération</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE NOUVELLE CATÉGORIE -->
+  <div class="modal-overlay" id="modalAddCategory">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>Nouvelle catégorie</span>
+        <button class="modal-close-btn" id="btnCloseCatModal" aria-label="Fermer la modale">&times;</button>
+      </div>
+      <form id="formAddCategory">
+        <div class="form-group">
+          <label for="catName">Nom de la catégorie</label>
+          <input type="text" id="catName" class="form-control" placeholder="Ex: Énergie, Loisirs..." required>
+        </div>
+        <div class="form-group">
+          <label for="catType">Type de catégorie</label>
+          <select id="catType" class="form-control">
+            <option value="expense">Dépense</option>
+            <option value="income">Revenu / Rentrée d'argent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="catColor">Couleur distinctive</label>
+          <input type="color" id="catColor" value="#3b82f6" class="form-control color-picker">
+        </div>
+        <button type="submit" class="btn-submit">Créer la catégorie</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODALE DÉTAIL APPROFONDI D'UNE CATÉGORIE -->
+  <div class="modal-overlay" id="modalCategoryDetail">
+    <div class="modal-box modal-box-large">
+      <div class="modal-title">
+        <div class="cat-modal-header-title">
+          <span class="cat-modal-dot" id="catDetailDot"></span>
+          <span id="catDetailTitle">Détail de la catégorie</span>
+          <span class="cat-modal-type-badge" id="catDetailTypeBadge">Dépense</span>
+        </div>
+        <button class="modal-close-btn" id="btnCloseCatDetailModal" aria-label="Fermer la modale">&times;</button>
+      </div>
+
+      <div class="cat-detail-body">
+        <!-- Mini stats clés -->
+        <div class="cat-detail-kpi-grid">
+          <div class="cat-kpi-box">
+            <span class="cat-kpi-label">Total cumulé</span>
+            <strong class="cat-kpi-val" id="catDetailTotal">0,00 €</strong>
+          </div>
+          <div class="cat-kpi-box">
+            <span class="cat-kpi-label">Moyenne / mois</span>
+            <strong class="cat-kpi-val" id="catDetailAvg">0,00 €</strong>
+          </div>
+          <div class="cat-kpi-box">
+            <span class="cat-kpi-label">Min mensuel</span>
+            <strong class="cat-kpi-val text-income" id="catDetailMin">0,00 €</strong>
+            <span class="cat-kpi-sub" id="catDetailMinMonth">-</span>
+          </div>
+          <div class="cat-kpi-box">
+            <span class="cat-kpi-label">Max mensuel (Pic)</span>
+            <strong class="cat-kpi-val text-expense" id="catDetailMax">0,00 €</strong>
+            <span class="cat-kpi-sub" id="catDetailMaxMonth">-</span>
+          </div>
+          <div class="cat-kpi-box">
+            <span class="cat-kpi-label">Écart (Max - Min)</span>
+            <strong class="cat-kpi-val" id="catDetailAmplitude">0,00 €</strong>
+            <span class="cat-kpi-sub">Volatilité</span>
+          </div>
+          <div class="cat-kpi-box">
+            <span class="cat-kpi-label">Opération record</span>
+            <strong class="cat-kpi-val" id="catDetailHighestSingle">0,00 €</strong>
+            <span class="cat-kpi-sub" id="catDetailHighestSingleDate">-</span>
+          </div>
+        </div>
+
+        <!-- Graphique d'historique mensuel dédié -->
+        <div class="cat-detail-chart-wrap">
+          <div class="cat-detail-chart-title">Historique mensuel sur la période</div>
+          <div style="height: 200px; position: relative;">
+            <canvas id="categoryDetailChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Liste des opérations de la catégorie -->
+        <div class="cat-detail-tx-section">
+          <div class="cat-tx-list-header">
+            <h4 class="cat-tx-list-title">Opérations de la période</h4>
+            <span class="cat-tx-count-badge" id="catDetailTxCountBadge">0 opération</span>
+          </div>
+          <div class="cat-detail-tx-list" id="catDetailTxList">
+            <!-- Liste dynamique -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST DE NOTIFICATION FLOTTANT -->
+  <div class="toast-msg" id="toastMessage">Enregistré</div>
+
+  <!-- MODULES JAVASCRIPT MODULAIRES -->
+  <script src="js/constants.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/realtime.js"></script>
+  <script src="js/transactions.js"></script>
+  <script src="js/visualization.js"></script>
+  <script src="js/categories.js"></script>
+  <script src="js/backup.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
